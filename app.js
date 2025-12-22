@@ -1043,14 +1043,14 @@ document.addEventListener('mousemove', (e) => {
     }
 });
 
-// Update cursor preview position on touch move
-document.addEventListener('touchmove', (e) => {
-    if (cursorPreview && e.touches.length > 0) {
-        const touch = e.touches[0];
-        cursorPreview.style.left = touch.clientX + 'px';
-        cursorPreview.style.top = touch.clientY + 'px';
-    }
-}, { passive: true });
+// Update cursor preview position on touch move - DISABLED on mobile to avoid confusion
+// document.addEventListener('touchmove', (e) => {
+//     if (cursorPreview && e.touches.length > 0) {
+//         const touch = e.touches[0];
+//         cursorPreview.style.left = touch.clientX + 'px';
+//         cursorPreview.style.top = touch.clientY + 'px';
+//     }
+// }, { passive: true });
 
 // Show cursor preview when hovering over sticker grid
 stickerGrid.addEventListener('mouseenter', () => {
@@ -1060,20 +1060,20 @@ stickerGrid.addEventListener('mouseenter', () => {
     }
 });
 
-// Show cursor preview when touching sticker grid
-stickerGrid.addEventListener('touchstart', () => {
-    if (detailScreen.classList.contains('visible') && !stickerGrid.classList.contains('readonly')) {
-        cursorPreview.textContent = selectedSticker;
-        cursorPreview.classList.add('active');
-    }
-}, { passive: true });
+// Show cursor preview when touching sticker grid - DISABLED on mobile to avoid confusion
+// stickerGrid.addEventListener('touchstart', () => {
+//     if (detailScreen.classList.contains('visible') && !stickerGrid.classList.contains('readonly')) {
+//         cursorPreview.textContent = selectedSticker;
+//         cursorPreview.classList.add('active');
+//     }
+// }, { passive: true });
 
 // Hide cursor preview when leaving sticker grid
 stickerGrid.addEventListener('mouseleave', () => {
     cursorPreview.classList.remove('active');
 });
 
-// Hide cursor preview when touch ends
+// Hide cursor preview when touch ends - keep to clean up any state
 stickerGrid.addEventListener('touchend', () => {
     cursorPreview.classList.remove('active');
 }, { passive: true });
