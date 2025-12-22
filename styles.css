@@ -282,6 +282,24 @@ body::before {
     background-clip: text;
 }
 
+/* Empty Filter Message */
+.empty-filter-message {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-lg);
+    border: 2px dashed var(--border-color);
+    margin: 20px 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    line-height: 1.6;
+}
+
 .progress-remaining {
     font-size: 0.9rem;
     color: var(--text-secondary);
@@ -1098,15 +1116,49 @@ body::before {
     padding: 16px 20px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
 }
 
 .detail-progress-section .detail-progress {
     display: flex;
     align-items: center;
-    gap: 6px;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    width: 100%;
     font-size: 1.1rem;
     font-weight: 600;
+}
+
+.detail-progress-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.detail-progress-right {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    font-weight: normal;
+    text-align: right;
+}
+
+.detail-count .current {
+    font-size: 2rem;
+    font-weight: 800;
+    background: var(--warning-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.detail-count .divider {
+    color: var(--text-muted);
+    font-weight: 400;
+    margin: 0 2px;
+}
+
+.detail-count .target {
+    color: var(--text-secondary);
+    font-weight: 500;
 }
 
 /* ===========================
@@ -1164,113 +1216,6 @@ body::before {
 }
 
 
-/* ===========================
-   Sticker Palette
-   =========================== */
-.sticker-palette {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: var(--bg-secondary);
-    border-top: 1px solid var(--border-color);
-    padding: 16px 20px;
-    z-index: 100;
-    transition: all 0.3s ease;
-}
-
-.palette-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-}
-
-/* Palette Toggle Button */
-.btn-palette-toggle {
-    padding: 4px 12px;
-    background: rgba(102, 126, 234, 0.2);
-    border: 1px solid var(--border-glow);
-    border-radius: var(--radius-sm);
-    font-size: 1.2rem;
-    cursor: pointer;
-    transition: all var(--transition-fast);
-}
-
-.btn-palette-toggle:hover {
-    background: rgba(102, 126, 234, 0.3);
-    transform: scale(1.1);
-}
-
-/* Collapsed State */
-.sticker-palette.collapsed .sticker-options {
-    max-height: 56px;
-    overflow: hidden;
-}
-
-.sticker-palette:not(.collapsed) .sticker-options {
-    max-height: 250px;
-}
-
-.sticker-palette.collapsed .btn-palette-toggle {
-    transform: rotate(0deg);
-}
-
-.sticker-palette:not(.collapsed) .btn-palette-toggle {
-    transform: rotate(180deg);
-}
-
-.btn-clear-all {
-    padding: 8px 12px;
-    background: rgba(245, 87, 108, 0.2);
-    border: 1px solid rgba(245, 87, 108, 0.3);
-    border-radius: var(--radius-sm);
-    color: #f5576c;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all var(--transition-fast);
-}
-
-.btn-clear-all:hover {
-    background: rgba(245, 87, 108, 0.3);
-}
-
-.btn-emoji-input {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--primary-gradient);
-    border: none;
-    border-radius: var(--radius-sm);
-    color: white;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all var(--transition-fast);
-}
-
-.btn-emoji-input:hover {
-    transform: scale(1.1);
-}
-
-.palette-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-
-.sticker-options {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    max-height: 250px;
-    overflow-y: auto;
-    padding-bottom: 8px;
-    -webkit-overflow-scrolling: touch;
 }
 
 .sticker-option {
@@ -1302,7 +1247,7 @@ body::before {
 /* Grid Actions (Clear All Button) */
 .grid-actions {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     padding: 0 20px 12px 20px;
 }
 
@@ -1401,6 +1346,63 @@ body::before {
     overflow-y: auto;
 }
 
+/* Sticker Selector Button */
+.btn-sticker-selector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 48px;
+    padding: 0 20px;
+    border-radius: 24px;
+    border: 2px dashed var(--primary);
+    background: linear-gradient(135deg, var(--surface) 0%, var(--secondary-bg) 100%);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.btn-sticker-selector:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary-hover);
+    box-shadow: 0 4px 12px rgba(124, 77, 255, 0.2);
+}
+
+.btn-sticker-selector:active {
+    transform: scale(0.98);
+}
+
+.sticker-label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.sticker-preview {
+    font-size: 24px;
+    line-height: 1;
+    display: block;
+}
+
+.sticker-arrow {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    transition: transform 0.2s ease;
+}
+
+.btn-sticker-selector:hover .sticker-arrow {
+    transform: translateY(2px);
+    color: var(--primary);
+}
+
+@keyframes stickerChange {
+    0% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(1.4) rotate(-15deg); }
+    100% { transform: scale(1) rotate(0deg); }
+}
+
+
+
 /* Clickable Reward Info */
 .reward-info-clickable {
     cursor: pointer;
@@ -1434,9 +1436,7 @@ body::before {
         justify-content: center;
     }
     
-    .detail-progress {
-        order: 2;
-    }
+
     
     .table-cell {
         min-height: 50px;

@@ -72,9 +72,11 @@
 
         <!-- 진행 상태 & 진행 바 -->
         <div class="detail-progress-section">
-            <div class="detail-progress">
-                <span class="detail-count" id="detailCount">0 / 10</span>
-                <span>⭐</span>
+            <div class="detail-progress" id="detailCount">
+                <!-- Populated by JS -->
+                <div class="detail-progress-left">
+                    <span class="current">0</span> <span class="divider">/</span> <span class="target">10</span> ⭐
+                </div>
             </div>
             <div class="progress-bar">
                 <div class="progress-fill" id="detailProgressFill" style="width: 0%"></div>
@@ -83,6 +85,10 @@
 
         <!-- 스티커 그리드 -->
         <div class="grid-actions">
+            <button class="btn-sticker-selector" id="btnStickerSelector" title="스티커 변경">
+                <span class="sticker-label" id="stickerLabel">스티커</span>
+                <span class="sticker-preview" id="stickerPreview">⭐</span>
+            </button>
             <button class="btn-clear-all-grid" id="btnClearAll">
                 🗑️ <span id="btnClearAllText">모두 지우기</span>
             </button>
@@ -93,18 +99,7 @@
             </div>
         </div>
 
-        <!-- 스티커 선택 팔레트 -->
-        <div class="sticker-palette">
-            <div class="palette-header">
-                <span id="stickerSelectText">스티커 선택</span>
-                <button class="btn-palette-toggle" id="btnPaletteToggle" aria-label="Toggle palette">
-                    ⬇️
-                </button>
-            </div>
-            <div class="sticker-options" id="stickerOptions">
-                <!-- 스티커들은 JS로 동적 생성 -->
-            </div>
-        </div>
+
 
     </div>
 
@@ -165,7 +160,7 @@
     <div class="modal-overlay" id="emojiPickerModal">
         <div class="modal modal-large">
             <div class="modal-header">
-                <h2 id="emojiPickerTitle">이모지 선택</h2>
+                <h2 id="emojiPickerTitle">스티커 선택</h2>
                 <button class="btn-close" id="btnCloseEmojiPicker">&times;</button>
             </div>
             <div class="modal-body">

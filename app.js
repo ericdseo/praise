@@ -46,8 +46,11 @@ const LANGUAGES = {
         readonlyTitle: '⚠️ 읽기 전용',
         readonlyDesc: '스티커를 수정하려면 메인 화면에서 "재시작"을 클릭하세요',
         confirmRestart: '이 보상을 다시 시작할까요? 기존 스티커가 모두 지워집니다.',
-        emojiPickerTitle: '이모지 선택',
-        clearAll: '모두 지우기'
+        emojiPickerTitle: '스티커 선택',
+        clearAll: '모두 지우기',
+        stickerLabel: '스티커',
+        emptyActive: '진행 중인 보상이 없습니다.<br>새로운 보상을 추가해보세요!',
+        emptyCompleted: '아직 완료된 보상이 없습니다.'
     },
     en: {
         appTitle: '🌟 Praise Stickers',
@@ -91,8 +94,11 @@ const LANGUAGES = {
         readonlyTitle: '⚠️ Read-only',
         readonlyDesc: 'To edit stickers, click "Restart" on the main screen',
         confirmRestart: 'Restart this reward? All existing stickers will be cleared.',
-        emojiPickerTitle: 'Choose Emoji',
-        clearAll: 'Clear All'
+        emojiPickerTitle: 'Choose Sticker',
+        clearAll: 'Clear All',
+        stickerLabel: 'Sticker',
+        emptyActive: 'No active rewards.<br>Add a new reward!',
+        emptyCompleted: 'No completed rewards yet.'
     }
 };
 
@@ -116,8 +122,7 @@ const detailName = document.getElementById('detailName');
 const detailCount = document.getElementById('detailCount');
 const detailProgressFill = document.getElementById('detailProgressFill');
 const stickerGrid = document.getElementById('stickerGrid');
-const stickerOptions = document.getElementById('stickerOptions');
-const stickerSelectText = document.getElementById('stickerSelectText');
+
 
 // Buttons
 const btnLang = document.getElementById('btnLang');
@@ -152,15 +157,7 @@ const emojiCategories = {
 };
 
 // Default Sticker Collection (Expanded)
-const defaultStickers = [
-    '⭐', '🌟', '💫', '✨', '💖', '💝', '🎈', '🌈', '🦄', '🎀',
-    '🍀', '🌸', '🏆', '🥇', '👑', '💎', '🎯', '🚀', '🎨', '🎵',
-    '🌺', '🌻', '🌼', '🌷', '🎁', '🎊', '🎉', '💐', '🌹', '🔥',
-    '❤️', '💛', '💚', '💙', '💜', '🧡', '🤍', '🖤', '🤎', '💕',
-    '😊', '😎', '🤩', '🥳', '🤗', '👍', '👏', '🙌', '💪', '✌️',
-    '🍕', '🍔', '🍟', '🍦', '🍰', '🧁', '🍩', '🍪', '🍫', '🍭',
-    '🌙', '☀️', '🌤️', '⛅', '🌈', '⚡', '☄️', '💧', '🌊', '🏖️'
-];
+
 
 // State
 let rewards = [];
@@ -168,10 +165,8 @@ let editingRewardId = null;
 let currentRewardId = null;
 let selectedSticker = '⭐';
 let currentEmojiCategory = 'food';
-let celebratingRewardId = null;
-let userStickers = [...defaultStickers];
+
 let currentFilter = 'active'; // 'active' | 'completed' | 'all'
-let isPaletteCollapsed = false; // Will be set based on device type
 
 // ===========================
 // Device Detection
@@ -200,6 +195,15 @@ function switchLanguage() {
     if (btnLangDetail) btnLangDetail.textContent = langText;
     localStorage.setItem('praiseStickers_lang', currentLang);
     updateUIText();
+    renderRewards(); // Re-render rewards to apply language changes
+    
+    // If detail screen is open, update its progress text as well
+    if (currentRewardId) {
+        const reward = rewards.find(r => r.id === currentRewardId);
+        if (reward) {
+            updateDetailProgress(reward);
+        }
+    }
 }
 
 function t(key) {
@@ -209,7 +213,7 @@ function t(key) {
 function updateUIText() {
     appTitle.textContent = t('appTitle');
     btnAddText.textContent = t('btnAdd');
-    stickerSelectText.textContent = t('stickerSelect');
+    btnAddText.textContent = t('btnAdd');
     btnClearAll.textContent = t('btnClearAll');
     btnCancelModal.textContent = t('btnCancel');
     btnSaveReward.textContent = t('btnSave');
@@ -266,6 +270,10 @@ function updateUIText() {
     if (tabAnimalPicker) tabAnimalPicker.textContent = t('tabAnimal');
     if (tabSpecialPicker) tabSpecialPicker.textContent = t('tabSpecial');
     
+    // Update sticker selector label
+    const stickerLabel = document.getElementById('stickerLabel');
+    if (stickerLabel) stickerLabel.textContent = t('stickerLabel');
+    
     // Update empty state
     const h2 = emptyState.querySelector('h2');
     const p = emptyState.querySelector('p');
@@ -273,8 +281,8 @@ function updateUIText() {
     if (p) p.innerHTML = t('emptyDesc').replace('\\n', '<br>');
     if (btnAddRewardEmpty) btnAddRewardEmpty.innerHTML = `<span class="plus-icon">+</span> ${t('btnAddFirst')}`;
     
-    // Re-render rewards to update text
-    renderRewards();
+    // Re-render removed from here to separate concerns
+    // renderRewards();
 }
 
 // ===========================
@@ -282,7 +290,7 @@ function updateUIText() {
 // ===========================
 function saveToStorage() {
     localStorage.setItem('praiseStickers_rewards_v3', JSON.stringify(rewards));
-    localStorage.setItem('praiseStickers_userStickers', JSON.stringify(userStickers));
+    // localStorage.setItem('praiseStickers_userStickers', JSON.stringify(userStickers)); // Removed
 }
 
 function loadFromStorage() {
@@ -316,9 +324,11 @@ function loadFromStorage() {
         return reward;
     });
     
-    const storedStickers = localStorage.getItem('praiseStickers_userStickers');
-    if (storedStickers) {
-        userStickers = JSON.parse(storedStickers);
+    // userStickers load logic removed
+
+    const storedRecent = localStorage.getItem('praiseStickers_recentStickers');
+    if (storedRecent) {
+        recentStickers = JSON.parse(storedRecent);
     }
     
     // Save migrated data
@@ -350,9 +360,19 @@ function renderRewards() {
     // Hide empty state if we have rewards (even if filtered results are empty)
     emptyState.classList.remove('visible');
     
-    // If filtered results are empty, show empty container
+    // If filtered results are empty, show empty container with message
     if (filteredRewards.length === 0) {
-        rewardsContainer.innerHTML = '';
+        let msgKey = 'emptyActive';
+        if (currentFilter === 'completed') msgKey = 'emptyCompleted';
+        
+        let message = '';
+        if (currentFilter === 'active') {
+            message = `<div class="empty-filter-message">${t('emptyActive')}</div>`;
+        } else if (currentFilter === 'completed') {
+            message = `<div class="empty-filter-message">${t('emptyCompleted')}</div>`;
+        }
+        
+        rewardsContainer.innerHTML = message;
         return;
     }
     
@@ -442,49 +462,23 @@ function renderEmojiPicker(category) {
 }
 
 // ===========================
-// Sticker Palette
+// Sticker Selection
 // ===========================
-function renderStickerPalette() {
-    // Show max 70 stickers
-    const visibleCount = Math.min(userStickers.length, 70);
-    const visibleStickers = userStickers.slice(0, visibleCount);
-    
-    stickerOptions.innerHTML = visibleStickers.map(sticker => `
-        <button class="sticker-option ${selectedSticker === sticker ? 'selected' : ''}" data-sticker="${sticker}">${sticker}</button>
-    `).join('') + `
-        <button class="sticker-option add-button" onclick="openEmojiPickerModal()">+</button>
-    `;
-}
-
 function selectSticker(sticker) {
     selectedSticker = sticker;
-    document.querySelectorAll('.sticker-option').forEach(opt => {
-        opt.classList.toggle('selected', opt.dataset.sticker === sticker);
-    });
+    
+    // Update button preview with animation
+    const preview = document.getElementById('stickerPreview');
+    if (preview) {
+        preview.style.animation = 'none';
+        // Trigger reflow
+        void preview.offsetWidth;
+        preview.textContent = sticker;
+        preview.style.animation = 'stickerChange 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+    }
     
     // Update cursor preview
     updateCursorPreview();
-    
-    // 모바일 뷰포트에서 스티커 선택 시 자동으로 팔레트 접기
-    if (isMobileViewport() && !isPaletteCollapsed) {
-        togglePalette();
-    }
-}
-
-function togglePalette() {
-    isPaletteCollapsed = !isPaletteCollapsed;
-    const palette = document.querySelector('.sticker-palette');
-    const toggleBtn = document.getElementById('btnPaletteToggle');
-    
-    if (!palette || !toggleBtn) return;
-    
-    if (isPaletteCollapsed) {
-        palette.classList.add('collapsed');
-        toggleBtn.textContent = '⬇️';
-    } else {
-        palette.classList.remove('collapsed');
-        toggleBtn.textContent = '⬆️';
-    }
 }
 
 // ===========================
@@ -508,33 +502,30 @@ function openDetailScreen(id) {
     detailName.textContent = reward.name;
     
     // Render grid and update progress
+    // Render grid and update progress
     renderStickerGrid(reward);
     updateDetailProgress(reward);
-    renderStickerPalette();
+    // Palette removed in new UX
     
     // Show/hide elements based on completion status
-    const stickerPalette = document.querySelector('.sticker-palette');
+    const btnStickerSelector = document.getElementById('btnStickerSelector');
+    
     if (isCompleted) {
         stickerGrid.classList.add('readonly');
-        stickerPalette.style.display = 'none';
+        if (btnStickerSelector) btnStickerSelector.style.display = 'none';
         showReadonlyNotice(reward);
     } else {
         stickerGrid.classList.remove('readonly');
-        stickerPalette.style.display = 'block';
-        hideReadonlyNotice();
-        
-        // 팔레트 초기 상태 설정 (모바일 뷰포트는 기본 접힘)
-        const isMobile = isMobileViewport();
-        isPaletteCollapsed = isMobile;
-        
-        const toggleBtn = document.getElementById('btnPaletteToggle');
-        if (isPaletteCollapsed) {
-            stickerPalette.classList.add('collapsed');
-            if (toggleBtn) toggleBtn.textContent = '⬇️';
-        } else {
-            stickerPalette.classList.remove('collapsed');
-            if (toggleBtn) toggleBtn.textContent = '⬆️';
+        if (btnStickerSelector) {
+            btnStickerSelector.style.display = 'flex';
+            // Set initial preview
+            const preview = document.getElementById('stickerPreview');
+            if (preview) {
+                preview.textContent = selectedSticker;
+                preview.style.animation = 'none';
+            }
         }
+        hideReadonlyNotice();
     }
     
     // Show detail screen
@@ -570,7 +561,21 @@ function updateDetailProgress(reward) {
     const progress = Math.min((stickerCount / reward.target) * 100, 100);
     const isCompleted = stickerCount >= reward.target;
     
-    detailCount.textContent = `${stickerCount} / ${reward.target}`;
+    const remaining = Math.max(reward.target - stickerCount, 0);
+    
+    // Left side: Count + Star
+    // Right side: Remaining text
+    detailCount.innerHTML = `
+        <div class="detail-progress-left">
+            <span class="detail-count-text">
+                <span class="current">${stickerCount}</span> <span class="divider">/</span> <span class="target">${reward.target}</span>
+            </span>
+            <span class="target-unit">⭐</span>
+        </div>
+        <div class="detail-progress-right">
+            ${isCompleted ? t('completedBadge') : `${remaining} ${t('remaining')}`}
+        </div>
+    `;
     detailProgressFill.style.width = `${progress}%`;
     detailProgressFill.classList.toggle('completed', isCompleted);
 }
@@ -801,7 +806,7 @@ currentEmojiPickerCategory = category;
     if (!grid) return;
     
     grid.innerHTML = emojis.map(emoji => `
-        <button class="emoji-grid-item ${userStickers.includes(emoji) ? 'selected' : ''}" 
+        <button class="emoji-grid-item ${selectedSticker === emoji ? 'selected' : ''}" 
                 onclick="selectEmojiFromPicker('${emoji}')">
             ${emoji}
         </button>
@@ -814,18 +819,6 @@ currentEmojiPickerCategory = category;
 }
 
 function selectEmojiFromPicker(emoji) {
-    if (userStickers.includes(emoji)) {
-        // Already in palette, just select it
-        selectSticker(emoji);
-        closeEmojiPickerModal();
-        return;
-    }
-    
-    // Add to front of array
-    userStickers.unshift(emoji);
-    
-    saveToStorage();
-    renderStickerPalette();
     selectSticker(emoji);
     closeEmojiPickerModal();
 }
@@ -978,32 +971,10 @@ btnTargetPlus.addEventListener('click', () => {
 });
 
 // Palette toggle
-const btnPaletteToggle = document.getElementById('btnPaletteToggle');
-if (btnPaletteToggle) {
-    btnPaletteToggle.addEventListener('click', togglePalette);
-}
+
 
 // 화면 크기 변경 감지
-window.addEventListener('resize', () => {
-    const isMobile = isTouchDevice();
-    const palette = document.querySelector('.sticker-palette');
-    const toggleBtn = document.getElementById('btnPaletteToggle');
-    
-    if (!palette || !toggleBtn) return;
-    
-    // 모바일로 전환 시 팔레트 접기
-    if (isMobile && !isPaletteCollapsed) {
-        isPaletteCollapsed = true;
-        palette.classList.add('collapsed');
-        toggleBtn.textContent = '⬇️';
-    }
-    // 데스크톱으로 전환 시 팔레트 펼치기
-    else if (!isMobile && isPaletteCollapsed) {
-        isPaletteCollapsed = false;
-        palette.classList.remove('collapsed');
-        toggleBtn.textContent = '⬆️';
-    }
-});
+// Resize listener removed (old palette logic)
 
 // Emoji tabs
 document.querySelectorAll('.emoji-tab').forEach(tab => {
@@ -1022,11 +993,14 @@ emojiPicker.addEventListener('click', (e) => {
 });
 
 // Sticker options
+// Sticker options (removed in new UX)
+/*
 stickerOptions.addEventListener('click', (e) => {
     if (e.target.classList.contains('sticker-option')) {
         selectSticker(e.target.dataset.sticker);
     }
 });
+*/
 
 // Close modals on overlay click
 rewardModal.addEventListener('click', (e) => {
@@ -1110,13 +1084,30 @@ function updateCursorPreview() {
 }
 
 // ===========================
+// Event Listeners - Sticker Selector
+// ===========================
+const btnStickerSelector = document.getElementById('btnStickerSelector');
+
+if (btnStickerSelector) {
+    // Click behavior - Open Picker directly
+    btnStickerSelector.addEventListener('click', () => {
+        openEmojiPickerModal();
+    });
+}
+
+// ===========================
 // Initialize
 // ===========================
 function init() {
     loadFromStorage();
-    renderRewards();
     renderEmojiPicker('food');
     updateUIText();
+    renderRewards();
 }
 
-init();
+// Wait for DOM to be fully loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
