@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>🌟 칭찬 스티커</title>
+    <meta name="description" content="아이들의 착한 행동을 칭찬 스티커로 보상하세요!">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 메인 화면 -->
+    <div class="app-container" id="mainScreen">
+        <!-- 헤더 -->
+        <header class="header">
+            <h1 id="appTitle">🌟 칭찬 스티커</h1>
+            <div class="header-actions">
+                <button class="btn-lang" id="btnLang" title="Switch Language">🇬🇧 EN</button>
+                <button class="btn-add-reward" id="btnAddReward">
+                    <span class="plus-icon">+</span>
+                    <span id="btnAddText">보상 추가</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- 필터 섹션 -->
+        <div class="filter-section">
+            <button class="filter-btn active" data-filter="active" id="filterActive">
+                <span id="filterActiveText">진행중</span>
+            </button>
+            <button class="filter-btn" data-filter="completed" id="filterCompleted">
+                <span id="filterCompletedText">완료됨</span>
+            </button>
+            <button class="filter-btn" data-filter="all" id="filterAll">
+                <span id="filterAllText">전체</span>
+            </button>
+        </div>
+
+        <!-- 보상 목록 -->
+        <main class="rewards-container" id="rewardsContainer">
+            <!-- 보상 카드들이 여기에 동적으로 추가됨 -->
+        </main>
+
+        <!-- 빈 상태 -->
+        <div class="empty-state" id="emptyState">
+            <div class="empty-icon">🎁</div>
+            <h2>보상을 추가해 보세요!</h2>
+            <p>아이가 스티커를 모아 받을 수 있는<br>보상을 설정해 주세요.</p>
+            <button class="btn-primary" id="btnAddRewardEmpty">
+                <span class="plus-icon">+</span> 첫 번째 보상 추가하기
+            </button>
+        </div>
+    </div>
+
+    <!-- 상세 화면 -->
+    <div class="detail-screen" id="detailScreen">
+        <header class="detail-header">
+            <button class="btn-back" id="btnBack">
+                <span>←</span>
+                <span>뒤로</span>
+            </button>
+            <div class="detail-title">
+                <span class="detail-emoji" id="detailEmoji">🎁</span>
+                <span class="detail-name" id="detailName">보상</span>
+            </div>
+            <button class="btn-lang" id="btnLangDetail" title="Switch Language">🇬🇧 EN</button>
+        </header>
+
+        <!-- 진행 상태 & 진행 바 -->
+        <div class="detail-progress-section">
+            <div class="detail-progress">
+                <span class="detail-count" id="detailCount">0 / 10</span>
+                <span>⭐</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="detailProgressFill" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- 스티커 그리드 -->
+        <div class="grid-actions">
+            <button class="btn-clear-all-grid" id="btnClearAll">
+                🗑️ <span id="btnClearAllText">모두 지우기</span>
+            </button>
+        </div>
+        <div class="sticker-grid-container">
+            <div class="sticker-grid" id="stickerGrid">
+                <!-- 그리드 셀들은 JS로 동적 생성 -->
+            </div>
+        </div>
+
+        <!-- 스티커 선택 팔레트 -->
+        <div class="sticker-palette">
+            <div class="palette-header">
+                <span id="stickerSelectText">스티커 선택</span>
+            </div>
+            <div class="sticker-options" id="stickerOptions">
+                <!-- 스티커들은 JS로 동적 생성 -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 보상 추가/수정 모달 -->
+    <div class="modal-overlay" id="rewardModal">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h2 id="modalTitle">새 보상 추가</h2>
+                <button class="btn-close" id="btnCloseModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label id="labelEmoji">이모지</label>
+                    <div class="emoji-tabs">
+                        <button class="emoji-tab active" data-category="food">🍔 <span id="tabFood">음식</span></button>
+                        <button class="emoji-tab" data-category="play">🎮 <span id="tabPlay">놀이</span></button>
+                        <button class="emoji-tab" data-category="gift">🎁 <span id="tabGift">선물</span></button>
+                        <button class="emoji-tab" data-category="animal">🐾 <span id="tabAnimal">동물</span></button>
+                        <button class="emoji-tab" data-category="special">🌟 <span id="tabSpecial">특별</span></button>
+                    </div>
+                    <div class="emoji-picker" id="emojiPicker">
+                        <!-- 카테고리별 이모지가 JS로 렌더링됨 -->
+                    </div>
+                    <input type="hidden" id="rewardEmoji" value="🎁">
+                </div>
+                <div class="form-group">
+                    <label for="rewardName" id="labelName">보상 이름</label>
+                    <input type="text" id="rewardName" placeholder="예: 아이스크림, 게임 30분" maxlength="20">
+                </div>
+                <div class="form-group">
+                    <label for="rewardTarget" id="labelTarget">필요한 스티커 수</label>
+                    <div class="number-input">
+                        <button class="btn-number" id="btnTargetMinus">−</button>
+                        <input type="number" id="rewardTarget" value="10" min="1" max="999">
+                        <button class="btn-number" id="btnTargetPlus">+</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="btnCancelModal">취소</button>
+                <button class="btn-primary" id="btnSaveReward">저장하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 축하 오버레이 -->
+    <div class="celebration-overlay" id="celebrationOverlay">
+        <div class="celebration-content">
+            <div class="celebration-emoji">🎉</div>
+            <h2>축하해요!</h2>
+            <p id="celebrationMessage">보상을 받을 수 있어요!</p>
+            <button class="btn-primary btn-large" id="btnClaimReward">보상 받기! 🎁</button>
+        </div>
+        <div class="confetti-container" id="confettiContainer"></div>
+    </div>
+
+    <!-- 이모지 피커 모달 -->
+    <div class="modal-overlay" id="emojiPickerModal">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h2 id="emojiPickerTitle">이모지 선택</h2>
+                <button class="btn-close" id="btnCloseEmojiPicker">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="emoji-tabs">
+                    <button class="emoji-tab active" data-category="food">
+                        🍔 <span id="tabFoodPicker">음식</span>
+                    </button>
+                    <button class="emoji-tab" data-category="play">
+                        🎮 <span id="tabPlayPicker">놀이</span>
+                    </button>
+                    <button class="emoji-tab" data-category="gift">
+                        🎁 <span id="tabGiftPicker">선물</span>
+                    </button>
+                    <button class="emoji-tab" data-category="animal">
+                        🐾 <span id="tabAnimalPicker">동물</span>
+                    </button>
+                    <button class="emoji-tab" data-category="special">
+                        🌟 <span id="tabSpecialPicker">특별</span>
+                    </button>
+                </div>
+                <div class="emoji-grid" id="emojiPickerGrid">
+                    <!-- 이모지들이 JS로 렌더링됨 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
