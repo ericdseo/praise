@@ -48,7 +48,7 @@ const LANGUAGES = {
         confirmRestart: '이 보상을 다시 시작할까요? 기존 스티커가 모두 지워집니다.',
         emojiPickerTitle: '스티커 선택',
         clearAll: '모두 지우기',
-        stickerLabel: '스티커',
+        stickerLabel: '스티커 바꾸기',
         emptyActive: '진행 중인 보상이 없습니다.<br>새로운 보상을 추가해보세요!',
         emptyCompleted: '아직 완료된 보상이 없습니다.'
     },
@@ -96,7 +96,7 @@ const LANGUAGES = {
         confirmRestart: 'Restart this reward? All existing stickers will be cleared.',
         emojiPickerTitle: 'Choose Sticker',
         clearAll: 'Clear All',
-        stickerLabel: 'Sticker',
+        stickerLabel: 'Change Sticker',
         emptyActive: 'No active rewards.<br>Add a new reward!',
         emptyCompleted: 'No completed rewards yet.'
     }
@@ -127,7 +127,6 @@ const stickerGrid = document.getElementById('stickerGrid');
 // Buttons
 const btnLang = document.getElementById('btnLang');
 const btnBack = document.getElementById('btnBack');
-const btnClearAll = document.getElementById('btnClearAll');
 const btnEmojiInput = document.getElementById('btnEmojiInput');
 const btnCloseModal = document.getElementById('btnCloseModal');
 const btnCancelModal = document.getElementById('btnCancelModal');
@@ -214,7 +213,6 @@ function updateUIText() {
     appTitle.textContent = t('appTitle');
     btnAddText.textContent = t('btnAdd');
     btnAddText.textContent = t('btnAdd');
-    btnClearAll.textContent = t('btnClearAll');
     btnCancelModal.textContent = t('btnCancel');
     btnSaveReward.textContent = t('btnSave');
     
@@ -253,10 +251,7 @@ function updateUIText() {
     
     // Update emoji picker modal
     const emojiPickerTitle = document.getElementById('emojiPickerTitle');
-    const btnClearAllText = document.getElementById('btnClearAllText');
-    
     if (emojiPickerTitle) emojiPickerTitle.textContent = t('emojiPickerTitle');
-    if (btnClearAllText) btnClearAllText.textContent = t('clearAll');
     
     const tabFoodPicker = document.getElementById('tabFoodPicker');
     const tabPlayPicker = document.getElementById('tabPlayPicker');
@@ -402,14 +397,14 @@ function renderRewards() {
                         ${isCompleted ? `<span class="completed-badge">${t('completedBadge')}</span>` : ''}
                     </div>
                     <div class="reward-actions">
-                        <button class="btn-icon btn-edit" onclick="editReward('${reward.id}')" aria-label="Edit">✏️</button>
+                        <button class="btn-icon btn-edit" onclick="editReward('${reward.id}')" aria-label="Edit">⚙️</button>
                         <button class="btn-icon btn-delete" onclick="deleteReward('${reward.id}')" aria-label="Delete">🗑️</button>
                     </div>
                 </div>
                 <div class="progress-section">
                     <div class="progress-info">
                         <span class="progress-count">
-                            <span class="current">${stickerCount}</span> / ${reward.target} ⭐
+                            <span class="current">${stickerCount}</span> / ${reward.target}
                         </span>
                         <span class="progress-remaining">
                             ${isCompleted ? `🎉 ${completedDateStr}` : `${remaining}${t('remaining')}`}
@@ -570,7 +565,7 @@ function updateDetailProgress(reward) {
             <span class="detail-count-text">
                 <span class="current">${stickerCount}</span> <span class="divider">/</span> <span class="target">${reward.target}</span>
             </span>
-            <span class="target-unit">⭐</span>
+            <span class="target-unit"></span>
         </div>
         <div class="detail-progress-right">
             ${isCompleted ? t('completedBadge') : `${remaining} ${t('remaining')}`}
@@ -702,6 +697,7 @@ function saveReward() {
             emoji,
             name,
             target,
+            status: 'active',
             stickers: [],
             createdAt: Date.now()
         });
@@ -772,6 +768,7 @@ function restartReward(id) {
     reward.completedAt = null;
     saveToStorage();
     renderRewards();
+    openDetailScreen(id); // Go directly to detail screen
 }
 
 function restartCurrentReward() {
@@ -868,6 +865,12 @@ function confirmClaim() {
         reward.completedAt = Date.now();
         saveToStorage();
         
+        // Switch to completed filter
+        currentFilter = 'completed';
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.filter === 'completed');
+        });
+        
         // If on detail screen, go back to main
         if (currentRewardId === celebratingRewardId) {
             hideCelebration();
@@ -917,7 +920,6 @@ btnCancelModal.addEventListener('click', closeModal);
 btnSaveReward.addEventListener('click', saveReward);
 btnClaimReward.addEventListener('click', confirmClaim);
 btnBack.addEventListener('click', closeDetailScreen);
-btnClearAll.addEventListener('click', clearAllStickers);
 
 // Emoji Picker Modal
 const btnCloseEmojiPicker = document.getElementById('btnCloseEmojiPicker');

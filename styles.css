@@ -1176,7 +1176,6 @@ body::before {
     border-radius: var(--radius-lg);
     border: 1px solid var(--border-color);
     padding: 20px;
-    min-height: 300px;
 }
 
 .grid-cell {
@@ -1247,7 +1246,7 @@ body::before {
 /* Grid Actions (Clear All Button) */
 .grid-actions {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     padding: 0 20px 12px 20px;
 }
 
@@ -1379,22 +1378,59 @@ body::before {
 }
 
 .sticker-preview {
-    font-size: 24px;
+    font-size: 1.5rem;
     line-height: 1;
-    display: block;
 }
 
 .sticker-arrow {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     color: var(--text-muted);
     transition: transform 0.2s ease;
 }
 
 .btn-sticker-selector:hover .sticker-arrow {
     transform: translateY(2px);
-    color: var(--primary);
 }
 
+/* Floating Sticker Button */
+.btn-sticker-floating {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 56px;
+    padding: 0 24px;
+    border-radius: 28px;
+    border: none;
+    background: var(--primary-gradient);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 6px 24px rgba(102, 126, 234, 0.5);
+    z-index: 100;
+}
+
+.btn-sticker-floating .sticker-preview {
+    font-size: 1.8rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.btn-sticker-floating .sticker-label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+}
+
+.btn-sticker-floating:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 10px 32px rgba(102, 126, 234, 0.6);
+}
+
+.btn-sticker-floating:active {
+    transform: scale(0.96);
+}
 @keyframes stickerChange {
     0% { transform: scale(1) rotate(0deg); }
     50% { transform: scale(1.4) rotate(-15deg); }
