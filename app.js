@@ -171,7 +171,23 @@ let currentEmojiCategory = 'food';
 let celebratingRewardId = null;
 let userStickers = [...defaultStickers];
 let currentFilter = 'active'; // 'active' | 'completed' | 'all'
-let isPaletteCollapsed = window.innerWidth <= 600; // 모바일에서는 기본 접힌 상태
+let isPaletteCollapsed = false; // Will be set based on device type
+
+// ===========================
+// Device Detection
+// ===========================
+// Detect if device is touch-only (no mouse)
+function isTouchDevice() {
+    return (('ontouchstart' in window) ||
+            (navigator.maxTouchPoints > 0) ||
+            (navigator.msMaxTouchPoints > 0)) &&
+           !window.matchMedia('(hover: hover)').matches;
+}
+
+// Check if viewport is mobile-sized (for auto-collapse behavior)
+function isMobileViewport() {
+    return window.innerWidth <= 768;
+}
 
 // ===========================
 // Language Functions
@@ -446,8 +462,11 @@ function selectSticker(sticker) {
         opt.classList.toggle('selected', opt.dataset.sticker === sticker);
     });
     
-    // 모바일에서 스티커 선택 시 자동으로 팔레트 접기
-    if (window.innerWidth <= 600 && !isPaletteCollapsed) {
+    // Update cursor preview
+    updateCursorPreview();
+    
+    // 모바일 뷰포트에서 스티커 선택 시 자동으로 팔레트 접기
+    if (isMobileViewport() && !isPaletteCollapsed) {
         togglePalette();
     }
 }
@@ -504,8 +523,8 @@ function openDetailScreen(id) {
         stickerPalette.style.display = 'block';
         hideReadonlyNotice();
         
-        // 팔레트 초기 상태 설정
-        const isMobile = window.innerWidth <= 600;
+        // 팔레트 초기 상태 설정 (모바일 뷰포트는 기본 접힘)
+        const isMobile = isMobileViewport();
         isPaletteCollapsed = isMobile;
         
         const toggleBtn = document.getElementById('btnPaletteToggle');
@@ -966,7 +985,7 @@ if (btnPaletteToggle) {
 
 // 화면 크기 변경 감지
 window.addEventListener('resize', () => {
-    const isMobile = window.innerWidth <= 600;
+    const isMobile = isTouchDevice();
     const palette = document.querySelector('.sticker-palette');
     const toggleBtn = document.getElementById('btnPaletteToggle');
     
@@ -1034,6 +1053,61 @@ document.addEventListener('keydown', (e) => {
         saveReward();
     }
 });
+
+// ===========================
+// Cursor Preview (Mouse Tracking)
+// ===========================
+const cursorPreview = document.getElementById('cursorPreview');
+
+// Update cursor preview position on mouse move
+document.addEventListener('mousemove', (e) => {
+    if (cursorPreview) {
+        cursorPreview.style.left = e.clientX + 'px';
+        cursorPreview.style.top = e.clientY + 'px';
+    }
+});
+
+// Update cursor preview position on touch move
+document.addEventListener('touchmove', (e) => {
+    if (cursorPreview && e.touches.length > 0) {
+        const touch = e.touches[0];
+        cursorPreview.style.left = touch.clientX + 'px';
+        cursorPreview.style.top = touch.clientY + 'px';
+    }
+}, { passive: true });
+
+// Show cursor preview when hovering over sticker grid
+stickerGrid.addEventListener('mouseenter', () => {
+    if (detailScreen.classList.contains('visible') && !stickerGrid.classList.contains('readonly')) {
+        cursorPreview.textContent = selectedSticker;
+        cursorPreview.classList.add('active');
+    }
+});
+
+// Show cursor preview when touching sticker grid
+stickerGrid.addEventListener('touchstart', () => {
+    if (detailScreen.classList.contains('visible') && !stickerGrid.classList.contains('readonly')) {
+        cursorPreview.textContent = selectedSticker;
+        cursorPreview.classList.add('active');
+    }
+}, { passive: true });
+
+// Hide cursor preview when leaving sticker grid
+stickerGrid.addEventListener('mouseleave', () => {
+    cursorPreview.classList.remove('active');
+});
+
+// Hide cursor preview when touch ends
+stickerGrid.addEventListener('touchend', () => {
+    cursorPreview.classList.remove('active');
+}, { passive: true });
+
+// Update cursor preview when sticker selection changes
+function updateCursorPreview() {
+    if (cursorPreview.classList.contains('active')) {
+        cursorPreview.textContent = selectedSticker;
+    }
+}
 
 // ===========================
 // Initialize
