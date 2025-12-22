@@ -276,8 +276,6 @@ function updateUIText() {
     if (p) p.innerHTML = t('emptyDesc').replace('\\n', '<br>');
     if (btnAddRewardEmpty) btnAddRewardEmpty.innerHTML = `<span class="plus-icon">+</span> ${t('btnAddFirst')}`;
     
-    // Re-render removed from here to separate concerns
-    // renderRewards();
 }
 
 // ===========================
@@ -285,7 +283,6 @@ function updateUIText() {
 // ===========================
 function saveToStorage() {
     localStorage.setItem('praiseStickers_rewards_v3', JSON.stringify(rewards));
-    // localStorage.setItem('praiseStickers_userStickers', JSON.stringify(userStickers)); // Removed
 }
 
 function loadFromStorage() {
@@ -319,8 +316,7 @@ function loadFromStorage() {
         return reward;
     });
     
-    // userStickers load logic removed
-
+    // Check for recentStickers
     const storedRecent = localStorage.getItem('praiseStickers_recentStickers');
     if (storedRecent) {
         recentStickers = JSON.parse(storedRecent);
@@ -471,9 +467,6 @@ function selectSticker(sticker) {
         preview.textContent = sticker;
         preview.style.animation = 'stickerChange 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
     }
-    
-    // Update cursor preview
-    updateCursorPreview();
 }
 
 // ===========================
@@ -1029,61 +1022,6 @@ document.addEventListener('keydown', (e) => {
         saveReward();
     }
 });
-
-// ===========================
-// Cursor Preview (Mouse Tracking)
-// ===========================
-const cursorPreview = document.getElementById('cursorPreview');
-
-// Update cursor preview position on mouse move
-document.addEventListener('mousemove', (e) => {
-    if (cursorPreview) {
-        cursorPreview.style.left = e.clientX + 'px';
-        cursorPreview.style.top = e.clientY + 'px';
-    }
-});
-
-// Update cursor preview position on touch move - DISABLED on mobile to avoid confusion
-// document.addEventListener('touchmove', (e) => {
-//     if (cursorPreview && e.touches.length > 0) {
-//         const touch = e.touches[0];
-//         cursorPreview.style.left = touch.clientX + 'px';
-//         cursorPreview.style.top = touch.clientY + 'px';
-//     }
-// }, { passive: true });
-
-// Show cursor preview when hovering over sticker grid
-stickerGrid.addEventListener('mouseenter', () => {
-    if (detailScreen.classList.contains('visible') && !stickerGrid.classList.contains('readonly')) {
-        cursorPreview.textContent = selectedSticker;
-        cursorPreview.classList.add('active');
-    }
-});
-
-// Show cursor preview when touching sticker grid - DISABLED on mobile to avoid confusion
-// stickerGrid.addEventListener('touchstart', () => {
-//     if (detailScreen.classList.contains('visible') && !stickerGrid.classList.contains('readonly')) {
-//         cursorPreview.textContent = selectedSticker;
-//         cursorPreview.classList.add('active');
-//     }
-// }, { passive: true });
-
-// Hide cursor preview when leaving sticker grid
-stickerGrid.addEventListener('mouseleave', () => {
-    cursorPreview.classList.remove('active');
-});
-
-// Hide cursor preview when touch ends - keep to clean up any state
-stickerGrid.addEventListener('touchend', () => {
-    cursorPreview.classList.remove('active');
-}, { passive: true });
-
-// Update cursor preview when sticker selection changes
-function updateCursorPreview() {
-    if (cursorPreview.classList.contains('active')) {
-        cursorPreview.textContent = selectedSticker;
-    }
-}
 
 // ===========================
 // Event Listeners - Sticker Selector
