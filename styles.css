@@ -1176,6 +1176,7 @@ body::before {
     border-top: 1px solid var(--border-color);
     padding: 16px 20px;
     z-index: 100;
+    transition: all 0.3s ease;
 }
 
 .palette-header {
@@ -1185,6 +1186,40 @@ body::before {
     margin-bottom: 12px;
     font-size: 0.9rem;
     color: var(--text-secondary);
+}
+
+/* Palette Toggle Button */
+.btn-palette-toggle {
+    padding: 4px 12px;
+    background: rgba(102, 126, 234, 0.2);
+    border: 1px solid var(--border-glow);
+    border-radius: var(--radius-sm);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-palette-toggle:hover {
+    background: rgba(102, 126, 234, 0.3);
+    transform: scale(1.1);
+}
+
+/* Collapsed State */
+.sticker-palette.collapsed .sticker-options {
+    max-height: 56px;
+    overflow: hidden;
+}
+
+.sticker-palette:not(.collapsed) .sticker-options {
+    max-height: 250px;
+}
+
+.sticker-palette.collapsed .btn-palette-toggle {
+    transform: rotate(0deg);
+}
+
+.sticker-palette:not(.collapsed) .btn-palette-toggle {
+    transform: rotate(180deg);
 }
 
 .btn-clear-all {

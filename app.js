@@ -171,6 +171,7 @@ let currentEmojiCategory = 'food';
 let celebratingRewardId = null;
 let userStickers = [...defaultStickers];
 let currentFilter = 'active'; // 'active' | 'completed' | 'all'
+let isPaletteCollapsed = window.innerWidth <= 600; // 모바일에서는 기본 접힌 상태
 
 // ===========================
 // Language Functions
@@ -444,6 +445,27 @@ function selectSticker(sticker) {
     document.querySelectorAll('.sticker-option').forEach(opt => {
         opt.classList.toggle('selected', opt.dataset.sticker === sticker);
     });
+    
+    // 모바일에서 스티커 선택 시 자동으로 팔레트 접기
+    if (window.innerWidth <= 600 && !isPaletteCollapsed) {
+        togglePalette();
+    }
+}
+
+function togglePalette() {
+    isPaletteCollapsed = !isPaletteCollapsed;
+    const palette = document.querySelector('.sticker-palette');
+    const toggleBtn = document.getElementById('btnPaletteToggle');
+    
+    if (!palette || !toggleBtn) return;
+    
+    if (isPaletteCollapsed) {
+        palette.classList.add('collapsed');
+        toggleBtn.textContent = '⬇️';
+    } else {
+        palette.classList.remove('collapsed');
+        toggleBtn.textContent = '⬆️';
+    }
 }
 
 // ===========================
@@ -481,6 +503,19 @@ function openDetailScreen(id) {
         stickerGrid.classList.remove('readonly');
         stickerPalette.style.display = 'block';
         hideReadonlyNotice();
+        
+        // 팔레트 초기 상태 설정
+        const isMobile = window.innerWidth <= 600;
+        isPaletteCollapsed = isMobile;
+        
+        const toggleBtn = document.getElementById('btnPaletteToggle');
+        if (isPaletteCollapsed) {
+            stickerPalette.classList.add('collapsed');
+            if (toggleBtn) toggleBtn.textContent = '⬇️';
+        } else {
+            stickerPalette.classList.remove('collapsed');
+            if (toggleBtn) toggleBtn.textContent = '⬆️';
+        }
     }
     
     // Show detail screen
@@ -920,6 +955,34 @@ btnTargetPlus.addEventListener('click', () => {
     const current = parseInt(rewardTarget.value) || 10;
     if (current < 999) {
         rewardTarget.value = current + 1;
+    }
+});
+
+// Palette toggle
+const btnPaletteToggle = document.getElementById('btnPaletteToggle');
+if (btnPaletteToggle) {
+    btnPaletteToggle.addEventListener('click', togglePalette);
+}
+
+// 화면 크기 변경 감지
+window.addEventListener('resize', () => {
+    const isMobile = window.innerWidth <= 600;
+    const palette = document.querySelector('.sticker-palette');
+    const toggleBtn = document.getElementById('btnPaletteToggle');
+    
+    if (!palette || !toggleBtn) return;
+    
+    // 모바일로 전환 시 팔레트 접기
+    if (isMobile && !isPaletteCollapsed) {
+        isPaletteCollapsed = true;
+        palette.classList.add('collapsed');
+        toggleBtn.textContent = '⬇️';
+    }
+    // 데스크톱으로 전환 시 팔레트 펼치기
+    else if (!isMobile && isPaletteCollapsed) {
+        isPaletteCollapsed = false;
+        palette.classList.remove('collapsed');
+        toggleBtn.textContent = '⬆️';
     }
 });
 
