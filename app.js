@@ -965,6 +965,26 @@ btnTargetPlus.addEventListener('click', () => {
     }
 });
 
+// Validate target input - only allow numbers
+rewardTarget.addEventListener('input', (e) => {
+    // Remove non-numeric characters
+    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+    
+    // Enforce max range
+    let value = parseInt(e.target.value);
+    if (value > 999) {
+        e.target.value = 999;
+    }
+});
+
+// Ensure valid value on blur (when user leaves the field)
+rewardTarget.addEventListener('blur', (e) => {
+    let value = parseInt(e.target.value);
+    if (isNaN(value) || value < 1) {
+        e.target.value = 1;
+    }
+});
+
 // Palette toggle
 
 
